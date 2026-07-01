@@ -23,3 +23,5 @@ Thumbs.db
 *.suo
 *.ntvs*
 *.njsproj
+
+/generated/prisma
