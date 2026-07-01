@@ -1,0 +1,25 @@
+node_modules/
+/npm-debug.log*
+/yarn-error.log*
+/yarn- some-story.log*
+/.pnpm-debug.log*
+
+/dist
+/artifacts
+/build
+*.tsbuildinfo
+
+.env
+.env.production
+.env.development
+.env.local
+
+Thumbs.db
+.DS_Store
+*.local
+
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
