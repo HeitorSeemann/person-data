@@ -1,23 +1,38 @@
-import { Injectable } from '@nestjs/common';
-import { Person } from '../entities/entity';
+import { Injectable, ConflictException, NotFoundException } from '@nestjs/common';
+import { PrismaService } from '../database/prismaService';
+
+import { Person, Prisma } from '@prisma/client'; 
 
 @Injectable()
 export class PersonService {
-  private persons: Person[] = [
-    { id: 1, name: 'Alice', age: 28, email: 'alice@email.com' },
-    { id: 2, name: 'Bob', age: 35, email: 'bob@email.com' }
-  ];
+  constructor(private prisma: PrismaService) {}
 
-  listAll(): Person[] {
-    return this.persons;
+  async listAll(): Promise<Person[]> {
+    return this.prisma.person.findMany();
   }
 
-  save(newPerson: Omit<Person, 'id'>): Person {
-    const person: Person = {
-      id: this.persons.length + 1,
-      ...newPerson
-    };
-    this.persons.push(person);
+  async save(newPerson: Prisma.PersonCreateInput): Promise<Person> {
+    try {
+      return await this.prisma.person.create({
+        data: newPerson,
+      });
+    } catch (error) {
+      if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === 'P2002') {
+        throw new ConflictException('Email already used.');
+      }
+      throw error;
+    }
+  }
+
+  async findById(id: number): Promise<Person> {
+    const person = await this.prisma.person.findUnique({
+      where: { id },
+    });
+
+    if (!person) {
+      throw new NotFoundException(`Person with ID ${id} not found.`);
+    }
+
     return person;
   }
 }
