@@ -1,29 +1,26 @@
 import { Router, Request, Response } from 'express';
-import { prisma } from './database'; // Importa a instância que configuramos
+import { prisma } from './database';
 
 const router = Router();
 
 router.post('/persons', async (req: Request, res: Response) => {
   try {
-    const { name, email } = req.body;
+    const { name, email, age } = req.body;
 
-    // Validação simples dos dados de entrada
-    if (!name || !email) {
-       return res.status(400).json({ error: 'Name and email are required.' });
+    if (!name || !email || age === undefined) {
+       return res.status(400).json({ error: 'Name, email and age are required.' });
     }
 
-    // Salva o registro diretamente no banco SQLite em memória
     const newPerson = await prisma.person.create({
       data: {
         name,
         email,
+        age: Number(age)
       },
     });
 
-    // Retorna o objeto criado com status 201 (Created)
     return res.status(201).json(newPerson);
   } catch (error: any) {
-    // Tratamento de erro caso o e-mail já esteja cadastrado (@unique no schema)
     if (error.code === 'P2002') {
        return res.status(409).json({ error: 'This email is already registered.' });
     }

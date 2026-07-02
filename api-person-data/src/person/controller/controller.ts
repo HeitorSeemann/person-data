@@ -1,6 +1,7 @@
-import { Controller, Get, Post, Body } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, ParseIntPipe } from '@nestjs/common';
 import { PersonService } from '../service/service';
-import { Person } from '../entities/entity';
+
+import { Person, Prisma } from '@prisma/client'; 
 
 @Controller('person')
 export class PersonController {
@@ -8,12 +9,17 @@ export class PersonController {
   constructor(private readonly personService: PersonService) {}
 
   @Get() 
-  findAll(): Person[] {
+  async findAll(): Promise<Person[]> {
     return this.personService.listAll();
   }
 
   @Post()
-  create(@Body() personData: Omit<Person, 'id'>): Person {
+  async create(@Body() personData: Prisma.PersonCreateInput): Promise<Person> {
     return this.personService.save(personData);
+  }
+
+  @Get(':id')
+  async findOne(@Param('id', ParseIntPipe) id: number): Promise<Person> {
+    return this.personService.findById(id);
   }
 }
